@@ -1,6 +1,6 @@
 # react-native-fileupload  [![NPM version](https://img.shields.io/npm/v/react-native-fileupload.svg?style=flat-square)](https://www.npmjs.com/package/react-native-fileupload)
 
-A file upload plugin for react-native .
+**Important**: iOS version created by booxood (react-native-file-upload). This repository is the continuation of https://github.com/booxood/react-native-file-upload.
 
 * Support to upload multiple files at a time
 * Support to files and fields
