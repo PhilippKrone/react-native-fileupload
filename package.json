@@ -1,0 +1,26 @@
+{
+  "name": "react-native-fileupload",
+  "version": "1.0.0",
+  "description": "A file upload plugin for react-native",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhilippKrone/react-native-fileupload.git"
+  },
+  "keywords": [
+    "react-component",
+    "react-native",
+    "ios",
+    "file",
+    "upload"
+  ],
+  "author": "Philipp Krone",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PhilippKrone/react-native-fileupload/issues"
+  },
+  "homepage": "https://github.com/PhilippKrone/react-native-fileupload"
+}
