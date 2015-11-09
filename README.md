@@ -27,7 +27,7 @@
 
   //Add the following two lines:
   include ':react-native-fileupload'
-  project(':react-native-fileupload').projectDir = new File(rootProject.projectDir, '../node_modules/fileupload/android')
+  project(':react-native-fileupload').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fileupload/android')
   ```
 
 * Edit `android/app/build.gradle` (note: **app** folder) to look like this: 
