@@ -20,7 +20,7 @@ import java.io.InputStreamReader;
 
 import com.facebook.react.bridge.WritableMap;
 import java.io.FileInputStream;
-import com.facebook.internal.BundleJSONConverter;
+import com.yoloci.fileupload.BundleJSONConverter;
 
 
 import org.json.JSONObject;
