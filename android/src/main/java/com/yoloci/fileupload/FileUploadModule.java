@@ -5,7 +5,7 @@ import android.os.Bundle;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySeyIterator;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -20,8 +20,6 @@ import java.io.InputStreamReader;
 
 import com.facebook.react.bridge.WritableMap;
 import java.io.FileInputStream;
-import com.yoloci.fileupload.BundleJSONConverter;
-
 
 import org.json.JSONObject;
 
@@ -81,7 +79,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             connection.setRequestMethod(method);
 
             // set headers
-            ReadableMapKeySeyIterator iterator = headers.keySetIterator();
+            ReadableMapKeySetIterator iterator = headers.keySetIterator();
             while (iterator.hasNextKey()) {
                 String key = iterator.nextKey();
                 connection.setRequestProperty(key, headers.getString(key));
@@ -95,7 +93,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             outputStream = new DataOutputStream( connection.getOutputStream() );
 
             // set fields
-            ReadableMapKeySeyIterator fieldIterator = fields.keySetIterator();
+            ReadableMapKeySetIterator fieldIterator = fields.keySetIterator();
             while (fieldIterator.hasNextKey()) {
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);
 
