@@ -152,22 +152,19 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
                     sb.append(line);
                 }
                 br.close();
-                JSONObject mainObject = new JSONObject(sb.toString());
-                if (mainObject != null) {
-                    BundleJSONConverter bjc = new BundleJSONConverter();
-                    Bundle bundle = bjc.convertToBundle(mainObject);
-                    WritableMap map = Arguments.fromBundle(bundle);
+                String data = sb.toString();
+                JSONObject mainObject = new JSONObject();
+                mainObject.put("data", data);
+                mainObject.put("status", serverResponseCode);
 
-                    fileInputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
-                    callback.invoke(null, map);
-                } else {
-                    fileInputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
-                    callback.invoke(null, null);
-                }
+                BundleJSONConverter bjc = new BundleJSONConverter();
+                Bundle bundle = bjc.convertToBundle(mainObject);
+                WritableMap map = Arguments.fromBundle(bundle);
+
+                fileInputStream.close();
+                outputStream.flush();
+                outputStream.close();
+                callback.invoke(null, map);
             }
 
 
@@ -177,5 +174,3 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
         }
     }
 }
-
-
