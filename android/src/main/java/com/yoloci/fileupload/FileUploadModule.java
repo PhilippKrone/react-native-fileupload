@@ -17,6 +17,8 @@ import java.net.URL;
 import java.io.DataOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 
 import com.facebook.react.bridge.WritableMap;
 import java.io.FileInputStream;
@@ -111,9 +113,12 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
                 String filepath = file.getString("filepath");
                 filepath = filepath.replace("file://", "");
                 fileInputStream = new FileInputStream(filepath);
+                String name = file.hasKey("name")? file.getString("name") : filename;
+                String filetype = file.hasKey("filetype")? file.getString("filetype") : URLConnection.getFileNameMap().getContentTypeFor(filepath);
 
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                outputStream.writeBytes("Content-Disposition: form-data; name=\"image\";filename=\"" + filename + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";filename=\"" + filename + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Type: " + filetype + lineEnd);
                 outputStream.writeBytes(lineEnd);
 
                 bytesAvailable = fileInputStream.available();
