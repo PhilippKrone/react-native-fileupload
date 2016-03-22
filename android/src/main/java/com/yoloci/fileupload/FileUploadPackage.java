@@ -1,5 +1,6 @@
 package com.yoloci.fileupload;
 
+import android.app.Activity;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -15,9 +16,10 @@ import java.util.List;
 
 public class FileUploadPackage implements ReactPackage {
     private FileUploadModule mModule;
+    private Activity mActivity = null;
 
-    public FileUploadPackage() {
-
+    public FileUploadPackage(Activity activity) {
+        mActivity = activity;
     }
 
     @Override
@@ -25,7 +27,7 @@ public class FileUploadPackage implements ReactPackage {
             ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
 
-        mModule = new FileUploadModule(reactContext);
+        mModule = new FileUploadModule(reactContext, mActivity);
         modules.add(mModule);
         return modules;
     }
