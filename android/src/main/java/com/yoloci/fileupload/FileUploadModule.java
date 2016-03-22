@@ -1,5 +1,6 @@
 package com.yoloci.fileupload;
 
+import android.app.Activity;
 import android.os.Bundle;
 
 import com.facebook.react.bridge.Arguments;
@@ -10,28 +11,50 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
-
-import java.io.DataInputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.io.DataOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 import com.facebook.react.bridge.WritableMap;
-import java.io.FileInputStream;
-
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Map;
+
+import android.provider.MediaStore;
+import android.net.Uri;
+import android.database.Cursor;
+import android.provider.DocumentsContract;
+
 public class FileUploadModule extends ReactContextBaseJavaModule {
+
+    private Activity mActivity;
 
     @Override
     public String getName() {
         return "FileUpload";
     }
 
-    public FileUploadModule(ReactApplicationContext reactContext) {
+    public FileUploadModule(ReactApplicationContext reactContext, Activity activity) {
         super(reactContext);
+        mActivity = activity;
+    }
+
+    public String getFilePath(String uri) {
+        Uri contentUri = Uri.parse(uri);
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = mActivity.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     @ReactMethod
@@ -107,8 +130,18 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             for (int i = 0; i < files.size(); i++) {
 
                 ReadableMap file = files.getMap(i);
-                String filename = file.getString("filename");
                 String filepath = file.getString("filepath");
+                String filename = null;
+                if (filepath.matches("content://.*")) {
+                    filepath = getFilePath(filepath);
+                }
+                if (file.hasKey("filename")) {
+                    filename = file.getString("fileName");
+                } else {
+                    int j = filepath.lastIndexOf('/');
+                    int k = filepath.lastIndexOf('.');
+                    filename = filepath.substring(j,k);
+                }
                 filepath = filepath.replace("file://", "");
                 fileInputStream = new FileInputStream(filepath);
 
