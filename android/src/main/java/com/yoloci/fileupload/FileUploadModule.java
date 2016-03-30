@@ -5,7 +5,7 @@ import android.os.Bundle;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySeyIterator;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -20,12 +20,20 @@ import java.io.InputStreamReader;
 
 import com.facebook.react.bridge.WritableMap;
 import java.io.FileInputStream;
-import com.facebook.internal.BundleJSONConverter;
-
 
 import org.json.JSONObject;
 
+//
+import android.provider.MediaStore;
+import android.provider.MediaStore.Images.Media;
+import android.net.Uri;
+import android.content.Context;
+import android.database.Cursor;
+import java.net.URL;
+
 public class FileUploadModule extends ReactContextBaseJavaModule {
+
+    private ReactApplicationContext reactContext;
 
     @Override
     public String getName() {
@@ -34,6 +42,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
     public FileUploadModule(ReactApplicationContext reactContext) {
         super(reactContext);
+        this.reactContext = reactContext;
     }
 
     @ReactMethod
@@ -54,8 +63,6 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
         ReadableArray files = options.getArray("files");
         ReadableMap fields = options.getMap("fields");
 
-
-
         HttpURLConnection connection = null;
         DataOutputStream outputStream = null;
         DataInputStream inputStream = null;
@@ -70,7 +77,6 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
             connectURL = new URL(uploadUrl);
 
-
             connection = (HttpURLConnection) connectURL.openConnection();
 
             // Allow Inputs &amp; Outputs.
@@ -81,13 +87,11 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             connection.setRequestMethod(method);
 
             // set headers
-            ReadableMapKeySeyIterator iterator = headers.keySetIterator();
+            ReadableMapKeySetIterator iterator = headers.keySetIterator();
             while (iterator.hasNextKey()) {
                 String key = iterator.nextKey();
                 connection.setRequestProperty(key, headers.getString(key));
             }
-
-
 
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
@@ -95,7 +99,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             outputStream = new DataOutputStream( connection.getOutputStream() );
 
             // set fields
-            ReadableMapKeySeyIterator fieldIterator = fields.keySetIterator();
+            ReadableMapKeySetIterator fieldIterator = fields.keySetIterator();
             while (fieldIterator.hasNextKey()) {
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);
 
@@ -110,12 +114,15 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
                 ReadableMap file = files.getMap(i);
                 String filename = file.getString("filename");
-                String filepath = file.getString("filepath");
+                // transform filepath to "realPathFromURI"
+                String filepath = getRealPathFromURI(this.reactContext, file.getString("filepath"));
+
+                String name = file.getString("name");
                 filepath = filepath.replace("file://", "");
                 fileInputStream = new FileInputStream(filepath);
 
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                outputStream.writeBytes("Content-Disposition: form-data; name=\"image\";filename=\"" + filename + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";filename=\"" + filename + "\"" + lineEnd);
                 outputStream.writeBytes(lineEnd);
 
                 bytesAvailable = fileInputStream.available();
@@ -141,7 +148,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
             int serverResponseCode = connection.getResponseCode();
             String serverResponseMessage = connection.getResponseMessage();
-            if (serverResponseCode != 200) {
+            if (serverResponseCode > 206) {
                 fileInputStream.close();
                 outputStream.flush();
                 outputStream.close();
@@ -154,22 +161,19 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
                     sb.append(line);
                 }
                 br.close();
-                JSONObject mainObject = new JSONObject(sb.toString());
-                if (mainObject != null) {
-                    BundleJSONConverter bjc = new BundleJSONConverter();
-                    Bundle bundle = bjc.convertToBundle(mainObject);
-                    WritableMap map = Arguments.fromBundle(bundle);
+                String data = sb.toString();
+                JSONObject mainObject = new JSONObject();
+                mainObject.put("data", data);
+                mainObject.put("status", serverResponseCode);
 
-                    fileInputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
-                    callback.invoke(null, map);
-                } else {
-                    fileInputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
-                    callback.invoke(null, null);
-                }
+                BundleJSONConverter bjc = new BundleJSONConverter();
+                Bundle bundle = bjc.convertToBundle(mainObject);
+                WritableMap map = Arguments.fromBundle(bundle);
+
+                fileInputStream.close();
+                outputStream.flush();
+                outputStream.close();
+                callback.invoke(null, map);
             }
 
 
@@ -178,6 +182,22 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             callback.invoke("Error happened: " + ex.getMessage(), null);
         }
     }
+
+    // Need this to transform gallery uri to "realPath" from android Filesystem
+    public String getRealPathFromURI(ReactApplicationContext context, String filePath) {
+        Cursor cursor = null;
+        Uri contentUri = Uri.parse(filePath);
+
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 }
-
-
