@@ -62,7 +62,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
         int bytesRead, bytesAvailable, bufferSize;
         byte[] buffer;
-        int maxBufferSize = 1*1024*1024;
+        int maxBufferSize = 1024*1024*1024;
 
         try {
 
@@ -99,7 +99,8 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
                 String key = fieldIterator.nextKey();
                 outputStream.writeBytes("Content-Disposition: form-data; name=\"" + key +  "\"" + lineEnd + lineEnd);
-                outputStream.writeBytes(fields.getString(key));
+//                outputStream.writeBytes(fields.getString(key));
+                outputStream.write(fields.getString(key).getBytes());
                 outputStream.writeBytes(lineEnd);
             }
 
@@ -107,13 +108,17 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             for (int i = 0; i < files.size(); i++) {
 
                 ReadableMap file = files.getMap(i);
+                String name = file.getString("name");
                 String filename = file.getString("filename");
                 String filepath = file.getString("filepath");
+                String filetype = file.getString("filetype");
                 filepath = filepath.replace("file://", "");
                 fileInputStream = new FileInputStream(filepath);
 
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                outputStream.writeBytes("Content-Disposition: form-data; name=\"image\";filename=\"" + filename + "\"" + lineEnd);
+                //outputStream.writeBytes("Content-Disposition: form-data; name=\"image\";filename=\"" + filename + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";filename=\"" + filename + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Type: " + filetype + lineEnd);
                 outputStream.writeBytes(lineEnd);
 
                 bytesAvailable = fileInputStream.available();
@@ -139,7 +144,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
             int serverResponseCode = connection.getResponseCode();
             String serverResponseMessage = connection.getResponseMessage();
-            if (serverResponseCode != 200) {
+            if (serverResponseCode > 206) {
                 fileInputStream.close();
                 outputStream.flush();
                 outputStream.close();
