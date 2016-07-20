@@ -1,42 +1,39 @@
 package com.yoloci.fileupload;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
-
-import java.io.DataInputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.io.DataOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 import com.facebook.react.bridge.WritableMap;
-import java.io.FileInputStream;
 
 import org.json.JSONObject;
 
-public class FileUploadModule extends ReactContextBaseJavaModule {
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+/**
+ * Created by kys on 7/20/2016.
+ */
+public class Uploader extends AsyncTask<ReadableMap, Void, String> {
 
     @Override
-    public String getName() {
-        return "FileUpload";
+    protected String doInBackground(ReadableMap... params) {
+        this.upload(params[0]);
+        return "";
     }
 
-    public FileUploadModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-    }
-
-    @ReactMethod
-    public void upload(final ReadableMap options, final Callback callback) {
-        /*String lineEnd = "\r\n";
+    public void upload(final ReadableMap options) {
+        String lineEnd = "\r\n";
         String twoHyphens = "--";
         String boundary =  "*****";
 
@@ -148,7 +145,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
                 fileInputStream.close();
                 outputStream.flush();
                 outputStream.close();
-                callback.invoke("Error happened: " + serverResponseMessage, null);
+                //callback.invoke("Error happened: " + serverResponseMessage, null);
             } else {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder sb = new StringBuilder();
@@ -169,15 +166,11 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
                 fileInputStream.close();
                 outputStream.flush();
                 outputStream.close();
-                callback.invoke(null, map);
+                //callback.invoke(null, map);
+                //Console.log(map.toString());
             }
-
-
-
         } catch(Exception ex) {
-            callback.invoke("Error happened: " + ex.getMessage(), null);
-        }*/
-        Uploader uploader = new Uploader();
-        uploader.execute(options);
+            //callback.invoke("Error happened: " + ex.getMessage(), null);
+        }
     }
 }
