@@ -50,18 +50,6 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
                 }
             };
 
-            params.onUploadBegin = new UploadParams.OnUploadBegin() {
-                public void onUploadBegin(int statusCode, int contentLength, Map<String, String> headers) {
-
-                }
-            };
-
-            params.onUploadProgress = new UploadParams.OnUploadProgress() {
-                public void onUploadProgress(int contentLength, int bytesWritten) {
-
-                }
-            };
-
             Uploader uploader = new Uploader();
             uploader.execute(params);
         } catch (Exception ex) {

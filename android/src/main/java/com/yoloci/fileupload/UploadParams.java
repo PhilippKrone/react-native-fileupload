@@ -15,7 +15,7 @@ public class UploadParams {
     }
 
     public interface OnUploadBegin {
-        void onUploadBegin(int statusCode, int contentLength, Map<String, String> headers);
+        void onUploadBegin();
     }
 
     public interface OnUploadProgress {
