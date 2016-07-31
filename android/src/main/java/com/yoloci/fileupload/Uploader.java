@@ -143,6 +143,7 @@ public class Uploader extends AsyncTask<UploadParams, int[], UploadResult> {
                 outputStream.flush();
                 outputStream.close();
                 res.statusCode = serverResponseCode;
+                res.responseStr = "";
             } else {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder sb = new StringBuilder();
@@ -164,6 +165,7 @@ public class Uploader extends AsyncTask<UploadParams, int[], UploadResult> {
                 outputStream.flush();
                 outputStream.close();
                 res.statusCode = serverResponseCode;
+                res.responseStr = data;
             }
         } catch(Exception ex) {
             //callback.invoke("Error happened: " + ex.getMessage(), null);

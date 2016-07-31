@@ -6,5 +6,6 @@ package com.yoloci.fileupload;
 public class UploadResult {
     public int statusCode;
     public int bytesWritten;
+    public String responseStr;
     public Exception exception;
 }

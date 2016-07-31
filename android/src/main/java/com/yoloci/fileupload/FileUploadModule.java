@@ -44,6 +44,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
                         WritableMap infoMap = Arguments.createMap();
                         ////infoMap.putInt("jobId", jobId);
                         infoMap.putInt("statusCode", res.statusCode);
+                        infoMap.putString("responseData", res.responseStr);
                         ////infoMap.putInt("bytesWritten", res.bytesWritten);
                         callback.invoke(null, infoMap);
                     }
