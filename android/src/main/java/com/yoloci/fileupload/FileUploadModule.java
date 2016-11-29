@@ -11,6 +11,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 
+import java.nio.charset.StandardCharsets;
 import java.io.DataInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -99,8 +100,9 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
                 String key = fieldIterator.nextKey();
                 outputStream.writeBytes("Content-Disposition: form-data; name=\"" + key +  "\"" + lineEnd + lineEnd);
-                outputStream.writeBytes(fields.getString(key));
-                outputStream.writeBytes(lineEnd);
+                
+                outputStream.write(fields.getString(key).getBytes(StandardCharsets.UTF_8));
+                outputStream.write(lineEnd.getBytes(StandardCharsets.UTF_8));
             }
 
 
