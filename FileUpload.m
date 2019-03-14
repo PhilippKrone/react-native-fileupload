@@ -128,9 +128,13 @@ RCT_EXPORT_METHOD(upload:(NSDictionary *)obj callback:(RCTResponseSenderBlock)ca
   NSInteger statusCode = [response statusCode];
   NSString *returnString = [[NSString alloc] initWithData:returnData encoding:NSUTF8StringEncoding];
 
-  NSDictionary *res=[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInteger:statusCode],@"status",returnString,@"data",nil];
-
-  callback(@[[NSNull null], res]);
+  if ((statusCode >= 200) && (statusCode < 300)) {
+    NSDictionary *res=[[NSDictionary alloc] initWithObjectsAndKeys:[NSNumber numberWithInteger:statusCode],@"status",returnString,@"data",nil];
+    callback(@[[NSNull null], res]);
+  } else {
+    NSString * errorResponse = [NSString stringWithFormat:@"%ld: %@", statusCode, [NSHTTPURLResponse localizedStringForStatusCode: statusCode]];
+    callback(@[errorResponse, [NSNull null]]);
+  }
 }
 
 - (NSString *)generateBoundaryString

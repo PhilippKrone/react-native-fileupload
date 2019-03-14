@@ -1,5 +1,6 @@
 package com.yoloci.fileupload;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.facebook.react.bridge.Arguments;
@@ -12,6 +13,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 
 import java.io.DataInputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.DataOutputStream;
@@ -25,6 +27,8 @@ import org.json.JSONObject;
 
 public class FileUploadModule extends ReactContextBaseJavaModule {
 
+    private final ReactApplicationContext _reactContext;
+
     @Override
     public String getName() {
         return "FileUpload";
@@ -32,6 +36,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
     public FileUploadModule(ReactApplicationContext reactContext) {
         super(reactContext);
+        _reactContext = reactContext;
     }
 
     @ReactMethod
@@ -58,7 +63,7 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
         DataOutputStream outputStream = null;
         DataInputStream inputStream = null;
         URL connectURL = null;
-        FileInputStream fileInputStream = null;
+        InputStream fileInputStream = null;
 
         int bytesRead, bytesAvailable, bufferSize;
         byte[] buffer;
@@ -107,13 +112,15 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
             for (int i = 0; i < files.size(); i++) {
 
                 ReadableMap file = files.getMap(i);
+                String name = file.getString("name");
                 String filename = file.getString("filename");
                 String filepath = file.getString("filepath");
-                filepath = filepath.replace("file://", "");
-                fileInputStream = new FileInputStream(filepath);
+                String filetype = file.getString("filetype");
+                fileInputStream = _reactContext.getContentResolver().openInputStream(Uri.parse(filepath));
 
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);
-                outputStream.writeBytes("Content-Disposition: form-data; name=\"image\";filename=\"" + filename + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";filename=\"" + filename + "\"" + lineEnd);
+                outputStream.writeBytes("Content-Type: " + filetype + lineEnd);
                 outputStream.writeBytes(lineEnd);
 
                 bytesAvailable = fileInputStream.available();
@@ -139,11 +146,11 @@ public class FileUploadModule extends ReactContextBaseJavaModule {
 
             int serverResponseCode = connection.getResponseCode();
             String serverResponseMessage = connection.getResponseMessage();
-            if (serverResponseCode != 200) {
+            if (!((serverResponseCode >= 200) && (serverResponseCode < 300))) {
                 fileInputStream.close();
                 outputStream.flush();
                 outputStream.close();
-                callback.invoke("Error happened: " + serverResponseMessage, null);
+                callback.invoke(serverResponseCode + ": " + serverResponseMessage, null);
             } else {
                 BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder sb = new StringBuilder();
