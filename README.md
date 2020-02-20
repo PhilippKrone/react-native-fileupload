@@ -45,7 +45,7 @@
     compile 'com.facebook.react:react-native:0.12.+'
 
     // Add this line:
-    compile project(':react-native-fileupload')
+    implementation project(':react-native-fileupload')
   }
   ```
 
@@ -77,7 +77,7 @@
         .addPackage(new MainReactPackage())
 
         // and this line:
-        .addPackage(new FileUploadPackage())
+        packages.add(new FileUploadPackage())
 
         .setUseDeveloperSupport(BuildConfig.DEBUG)
         .setInitialLifecycleState(LifecycleState.RESUMED)
